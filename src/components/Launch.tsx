@@ -51,7 +51,35 @@ export default function Launch(props: any) {
     }
   }
 
+  const getAgency = (agencies: any) => {
+    if (agencies.length == 0) {
+      return "";
+    } else {
+      let list = "";
+      // console.log(agencies)
+      for (let agency of agencies) {
+        //  console.log(agency.name)
+        list += agency.name + "";
+      }
 
+      return list;
+    }
+  };
+
+  const getAbbrev = (agencies: any) => {
+    if (agencies.length == 0) {
+      return "";
+    } else {
+      let list = "";
+      // console.log(agencies)
+      for (let agency of agencies) {
+        //  console.log(agency.name)
+        list += agency.abbrev + "";
+      }
+
+      return list;
+    }
+  };
 
   function hasMonthChanged(currentDate: any, previousDate: any) {
     if (currentDate.net_precision && previousDate.net_precision)
@@ -85,13 +113,13 @@ export default function Launch(props: any) {
       }
 
       let featuredLaunch = launches[0];
-    //  console.log(featuredLaunch);
+      //  console.log(featuredLaunch);
       let displayedLaunches = launches.slice(1);
-    //  console.log(displayedLaunches);
+      //  console.log(displayedLaunches);
 
       let [results, setResults] = useState([...displayedLaunches]);
 
-      const handleInput = (ev: Event ) => {
+      const handleInput = (ev: Event) => {
 
         let query = "";
         const target = ev?.target as HTMLIonSearchbarElement;
@@ -102,11 +130,13 @@ export default function Launch(props: any) {
             (d: any) =>
               d.name.toLowerCase().indexOf(query) > -1 ||
               d.launch_service_provider.name.toLowerCase().indexOf(query) >
-                -1 ||
+              -1 ||
               d.pad.name.toLowerCase().indexOf(query) > -1 ||
               d.pad.location.name.toLowerCase().indexOf(query) > -1 ||
               monthAsWordUTC(d.net).toLowerCase().indexOf(query) > -1 ||
-              d.status.abbrev.toLowerCase().indexOf(query) > -1
+              d.status.abbrev.toLowerCase().indexOf(query) > -1 ||
+              getAgency(d.mission ? d.mission.agencies : []).toLowerCase().indexOf(query) > -1 ||
+              getAbbrev(d.mission ? d.mission.agencies : []).toLowerCase().indexOf(query) > -1
           )
         );
       };
@@ -138,6 +168,7 @@ export default function Launch(props: any) {
             </IonItem>
 
             <IonSearchbar
+              placeholder="Search (launch vehicle, mission agency, etc.)"
               debounce={1}
               onIonInput={(ev) => handleInput(ev)}
             ></IonSearchbar>
@@ -214,31 +245,31 @@ export default function Launch(props: any) {
                 </button>
                 {devMode ? (
                   <>
-                  <button onClick={() => forceAPICall()}>
-                    Purge all API data
-                  </button>
-                  <input id="offset" type="number" >
-                    
-                  </input>
-                  <button  onClick={()=> {
-                    console.log(document.getElementById("offset")?.value)
+                    <button onClick={() => forceAPICall()}>
+                      Purge all API data
+                    </button>
+                    <input id="offset" type="number" >
 
-                    let offset = Number.isNaN(Number.parseInt(document.getElementById("offset")?.value)) ? 0 : Number.parseInt(document.getElementById("offset")?.value)
-                    localforage
-                    .setItem("offset", offset);
+                    </input>
+                    <button onClick={() => {
+                      console.log(document.getElementById("offset")?.value)
 
-                    forceAPICall();
+                      let offset = Number.isNaN(Number.parseInt(document.getElementById("offset")?.value)) ? 0 : Number.parseInt(document.getElementById("offset")?.value)
+                      localforage
+                        .setItem("offset", offset);
 
-                  }}>Refresh data with offset</button>
-                  <IonCheckbox checked={useDevApi} onIonChange={(event : CustomEvent) => {
-                    console.log(event.detail.checked)
+                      forceAPICall();
 
-                    localforage
-                    .setItem("useDevApi", event.detail.checked);
-                  }}>Use Dev API on Next Reload</IonCheckbox>
-                  <button onClick={() => { forceAPICall() }}>Clear ALL data</button>
+                    }}>Refresh data with offset</button>
+                    <IonCheckbox checked={useDevApi} onIonChange={(event: CustomEvent) => {
+                      console.log(event.detail.checked)
+
+                      localforage
+                        .setItem("useDevApi", event.detail.checked);
+                    }}>Use Dev API on Next Reload</IonCheckbox>
+                    <button onClick={() => { forceAPICall() }}>Clear ALL data</button>
                   </>
-                  
+
                 ) : (
                   <></>
                 )}
